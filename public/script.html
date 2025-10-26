@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ScriptBlox — Roblox Scripts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0a0a0f;
+      --surface:#13131a;
+      --border:rgba(255,255,255,.08);
+      --text:#e4e4e7;
+      --muted:#71717a;
+      --accent:#8b5cf6;
+      --accent-hover:#7c3aed;
+      --blue:#2563eb;
+      --blue-hover:#1d4ed8;
+      --orange:#f97316;
+      --green:#10b981;
+    }
+    body{
+      font-family:'Space Grotesk',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      overflow-x:hidden;
+      position:relative;
+    }
+    .bg-grid{
+      position:fixed;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(139,92,246,0.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(139,92,246,0.04) 1px,transparent 1px);
+      background-size:60px 60px;
+      animation:gridMove 25s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+    .bg-gradient{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .bg-gradient::before,
+    .bg-gradient::after{
+      content:'';
+      position:absolute;
+      width:700px;
+      height:700px;
+      border-radius:50%;
+      filter:blur(120px);
+      opacity:.18;
+      animation:float 18s ease-in-out infinite;
+    }
+    .bg-gradient::before{
+      background:radial-gradient(circle,var(--accent) 0%,transparent 70%);
+      top:-350px;left:-250px;
+    }
+    .bg-gradient::after{
+      background:radial-gradient(circle,#ec4899 0%,transparent 70%);
+      bottom:-350px;right:-250px;
+      animation-delay:-9s;
+    }
+    @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,60px) scale(1.15)}}
+    header{
+      position:relative;
+      z-index:10;
+      padding:1.5rem 2rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      background:rgba(10,10,15,0.85);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+    }
+    .brand div{
+      width:32px;height:32px;
+      border-radius:8px;
+      background:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.2rem;
+      color:#fff;
+      font-weight:700;
+    }
+    .brand-text .title{
+      font-size:1.25rem;font-weight:700;letter-spacing:-.02em;
+    }
+    .brand-text .tag{
+      font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+    }
+    nav{
+      display:flex;gap:2rem;
+    }
+    .nav-link{
+      color:var(--muted);
+      text-decoration:none;
+      font-size:.9rem;
+      font-weight:500;
+      position:relative;
+      transition:color .2s;
+      cursor:pointer;
+    }
+    .nav-link:hover{color:var(--text);}
+    .nav-link::after{
+      content:'';
+      position:absolute;
+      bottom:-4px;
+      left:0;
+      width:0;
+      height:2px;
+      background:var(--accent);
+      transition:width .3s;
+    }
+    .nav-link:hover::after{width:100%;}
+    main{
+      flex:1;
+      padding:2rem;
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
+    }
+    .script-content{
+      display:flex;
+      gap:2rem;
+      animation:fadeIn .6s ease-out;
+    }
+    .left-panel{
+      flex:1;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1.5rem;
+    }
+    .script-thumbnail{
+      width:100%;
+      height:200px;
+      object-fit:cover;
+      border-radius:10px;
+      margin-bottom:1rem;
+    }
+    .script-title{
+      font-size:1.5rem;
+      font-weight:700;
+      margin-bottom:1rem;
+    }
+    .script-author{
+      color:var(--accent);
+      font-size:1rem;
+      margin-bottom:1rem;
+    }
+    .game-info{
+      display:flex;
+      align-items:center;
+      gap:1rem;
+      margin-bottom:1rem;
+    }
+    .game-icon{
+      width:48px;
+      height:48px;
+      border-radius:8px;
+      object-fit:cover;
+    }
+    .discord-link{
+      color:var(--blue);
+      text-decoration:none;
+      font-weight:500;
+      margin-top:1rem;
+      display:inline-block;
+    }
+    .discord-link:hover{color:var(--blue-hover);}
+    .right-panel{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+    pre{
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:1.5rem;
+      overflow:auto;
+      white-space:pre-wrap;
+      font-family:monospace;
+      font-size:.9rem;
+      line-height:1.5;
+      max-height:60vh;
+    }
+    .reactions{
+      display:flex;
+      gap:1rem;
+      align-items:center;
+    }
+    .reaction-btn{
+      background:var(--surface);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:.75rem 1rem;
+      border-radius:8px;
+      cursor:pointer;
+      transition:background .2s;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      font-weight:500;
+    }
+    .reaction-btn:hover{background:var(--bg);}
+    .like-btn{color:var(--green);}
+    .dislike-btn{color:var(--orange);}
+    .not-found{
+      text-align:center;
+      padding:3rem;
+      color:var(--muted);
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:700px){
+      header{flex-direction:column;gap:1rem;}
+      nav{gap:1.2rem;justify-content:center;flex-wrap:wrap;}
+      main{padding:1.5rem;}
+      .script-content{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-gradient"></div>
+  <header>
+    <div class="brand">
+      <div>S</div>
+      <div class="brand-text">
+        <div class="title">ScriptBlox</div>
+        <div class="tag">Roblox Scripts</div>
+      </div>
+    </div>
+    <nav>
+      <span class="nav-link" onclick="window.location.href='index.html'">Home</span>
+      <span class="nav-link" onclick="window.location.href='index.html#upload'">Upload</span>
+    </nav>
+  </header>
+  <main>
+    <div id="content"></div>
+  </main>
+  <script>
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    async function updateLike(id, type) {
+      try {
+        const res = await fetch(`/api/scripts?action=${type}&id=${id}`, {method: 'POST'});
+        if (res.ok) {
+          location.reload();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function loadScript() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) {
+        document.getElementById('content').innerHTML = '<div class="not-found">Script not found</div>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/scripts?id=${id}`);
+        const script = await res.json();
+        if (!script.id) {
+          document.getElementById('content').innerHTML = '<div class="not-found">Script not found</div>';
+          return;
+        }
+        document.getElementById('content').innerHTML = `
+          <div class="script-content">
+            <div class="left-panel">
+              <img class="script-thumbnail" src="${script.thumbnail_url}" alt="Thumbnail">
+              <div class="script-title">${script.title}</div>
+              <div class="script-author">By ${script.author}</div>
+              <div class="game-info">
+                <img class="game-icon" src="${script.game_icon}" alt="Game Icon">
+                <span>${script.game_name}</span>
+              </div>
+              ${script.discord ? `<a href="${script.discord}" class="discord-link" target="_blank"><i class="fab fa-discord"></i> Join Discord</a>` : ''}
+            </div>
+            <div class="right-panel">
+              <pre><code>${escapeHtml(script.code)}</code></pre>
+              <div class="reactions">
+                <button class="reaction-btn like-btn" onclick="updateLike(${script.id}, 'like')">
+                  <i class="fas fa-thumbs-up"></i> ${script.likes}
+                </button>
+                <button class="reaction-btn dislike-btn" onclick="updateLike(${script.id}, 'dislike')">
+                  <i class="fas fa-thumbs-down"></i> ${script.dislikes}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('content').innerHTML = '<div class="not-found">Error loading script</div>';
+      }
+    }
+
+    loadScript();
+  </script>
+</body>
+</html>
