@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Status</title>
+  <style>
+    body {font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#111;color:#fff;}
+    .status{font-size:3em;text-transform:uppercase;padding:20px 40px;border-radius:10px;}
+    .online{background:#2ecc71;}
+    .offline{background:#e74c3c;}
+  </style>
+</head>
+<body>
+  <div id="status" class="status offline">OFFLINE</div>
+  <script>
+    async function update(){
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      const el = document.getElementById('status');
+      el.textContent = data.status.toUpperCase();
+      el.className = 'status ' + data.status;
+    }
+    update();
+    setInterval(update, 3000);
+  </script>
+</body>
+</html>
