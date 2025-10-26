@@ -393,8 +393,15 @@
   </main>
   <script>
     async function getScripts() {
-      const res = await fetch('/api/scripts');
-      return await res.json();
+      try {
+        const res = await fetch('/api/scripts');
+        if (!res.ok) throw new Error('Failed to fetch scripts');
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Error fetching scripts:', error);
+        return [];
+      }
     }
 
     function showSection(sectionId) {
@@ -418,20 +425,12 @@
         if (!match) throw new Error('Invalid Roblox game URL');
         const placeId = match[1];
 
-        const placeRes = await fetch(`https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`);
-        const placeData = await placeRes.json();
-        if (!placeData.data[0]) throw new Error('Game not found');
-        const universeId = placeData.data[0].universeId;
+        const res = await fetch(`/api/scripts?action=gameInfo&placeId=${placeId}`);
+        if (!res.ok) throw new Error('Failed to fetch game info');
+        const { gameIcon, gameName } = await res.json();
 
-        const gameRes = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
-        const gameData = await gameRes.json();
-        if (!gameData.data[0]) throw new Error('Game details not found');
-        const game = gameData.data[0];
-
-        document.getElementById('game-icon').src = game.universeAvatarType === 'User' ? 
-          `https://www.roblox.com/headshot-thumbnail/image?userId=${game.creatorId}&width=150&height=150&format=png` :
-          `https://thumbnails.roblox.com/v1/groups/icon?groupId=${game.creatorId}&size=150x150&format=Png&isCircular=false`;
-        document.getElementById('game-name').textContent = game.name;
+        document.getElementById('game-icon').src = gameIcon;
+        document.getElementById('game-name').textContent = gameName;
         document.getElementById('game-info').style.display = 'flex';
 
         checkFormValidity();
@@ -487,7 +486,8 @@
           document.getElementById('game-info').style.display = 'none';
           showSection('home');
         } else {
-          alert('Publish failed');
+          const error = await res.json();
+          alert('Publish failed: ' + (error.error || 'Unknown error'));
         }
       } catch (error) {
         alert('Error: ' + error.message);
@@ -495,10 +495,11 @@
     });
 
     async function renderScripts() {
-      const scripts = await getScripts();
       const grid = document.getElementById('scripts-grid');
       const noScripts = document.getElementById('no-scripts');
-      if (scripts.length === 0) {
+      const scripts = await getScripts();
+      console.log('Scripts fetched:', scripts); // Debug log
+      if (!scripts || scripts.length === 0) {
         grid.style.display = 'none';
         noScripts.style.display = 'block';
         return;
