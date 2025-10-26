@@ -9,6 +9,41 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const id = searchParams.get('id');
+    const action = searchParams.get('action');
+
+    if (action === 'gameInfo') {
+      const placeId = searchParams.get('placeId');
+      if (!placeId) {
+        return res.status(400).json({ error: 'Missing placeId' });
+      }
+      try {
+        const placeRes = await fetch(`https://games.roblox.com/v1/games/multiget-place-details?placeIds=${placeId}`, {
+          headers: { 'User-Agent': 'ScriptBlox/1.0' }
+        });
+        if (!placeRes.ok) throw new Error('Failed to fetch place details');
+        const placeData = await placeRes.json();
+        if (!placeData.data[0]) throw new Error('Game not found');
+        const universeId = placeData.data[0].universeId;
+
+        const gameRes = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`, {
+          headers: { 'User-Agent': 'ScriptBlox/1.0' }
+        });
+        if (!gameRes.ok) throw new Error('Failed to fetch game details');
+        const gameData = await gameRes.json();
+        if (!gameData.data[0]) throw new Error('Game details not found');
+        const game = gameData.data[0];
+
+        const gameIcon = game.universeAvatarType === 'User'
+          ? `https://www.roblox.com/headshot-thumbnail/image?userId=${game.creatorId}&width=150&height=150&format=png`
+          : `https://thumbnails.roblox.com/v1/groups/icon?groupId=${game.creatorId}&size=150x150&format=Png&isCircular=false`;
+
+        res.status(200).json({ gameIcon, gameName: game.name });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+      return;
+    }
+
     try {
       if (id) {
         const { rows } = await sql`SELECT * FROM scripts WHERE id = ${parseInt(id)}`;
@@ -53,8 +88,12 @@ export default async function handler(req, res) {
         query = sql`UPDATE scripts SET dislikes = dislikes + 1 WHERE id = ${id} RETURNING dislikes`;
       }
       if (query) {
-        const { rows } = await query;
-        res.status(200).json({ [action]: rows[0][action === 'like' ? 'likes' : 'dislikes'] });
+        try {
+          const { rows } = await query;
+          res.status(200).json({ [action]: rows[0][action === 'like' ? 'likes' : 'dislikes'] });
+        } catch (error) {
+          res.status(500).json({ error: 'DB error' });
+        }
         return;
       }
     }
